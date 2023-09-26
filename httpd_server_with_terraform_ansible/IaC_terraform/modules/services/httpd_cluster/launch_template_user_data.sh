@@ -1,3 +1,8 @@
 #!/bin/bash
-echo "Hello, World" > index.xhtml
-nohup busybox httpd -f -p 8080 &
+cat > index.xhtml <<EOF
+<h1>Hello, World</h1>
+<p>DB address: ${db_address}</p>
+<p>DB port: ${db_port}</p>
+EOF
+
+nohup busybox httpd -f -p ${server_port} &

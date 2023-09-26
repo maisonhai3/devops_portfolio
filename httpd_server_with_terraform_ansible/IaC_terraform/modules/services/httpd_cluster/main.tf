@@ -18,7 +18,7 @@ provider "aws" {
 }
 
 # NETWORKING
-variable "incoming_port" {
+variable "server_port" {
   type = number
   default = 80
 }
@@ -36,8 +36,12 @@ resource "aws_launch_template" "httpd-server" {
   vpc_security_group_ids = [aws_security_group.services_sg.id]
   key_name = "CICD_kp"
   
-  user_data = filebase64("${path.module}/launch_template_user_data.sh")
-  # user_data = templatefile("${path.module}/launch_template_user_data.sh")
+  # user_data = filebase64("${path.module}/launch_template_user_data.sh")
+  user_data = templatefile("user-data.sh", {
+    server_port = var.server_port
+    db_address  = data.terraform_remote_state.db.outputs.address
+    db_port     = data.terraform_remote_state.db.outputs.port
+  })
 }
 
 resource "aws_security_group" "services_sg" {
@@ -45,7 +49,8 @@ resource "aws_security_group" "services_sg" {
 
   ingress {
     from_port = local.http_port
-    to_port = local.http_portar.incoming_port
+    to_port = local.http_portar.server_port
+  
     protocol = local.tcp_protocol
     cidr_blocks = local.all_ips
   }
@@ -150,7 +155,8 @@ resource "aws_lb_listener_rule" "asg" {
 
 resource "aws_lb_target_group" "asg" {
   name = "${var.cluster_name}-lb-tg" 
-  port = var.incoming_port
+  port = var.server_port
+
   protocol = "HTTP"
   vpc_id = data.aws_vpc.default.id
 
