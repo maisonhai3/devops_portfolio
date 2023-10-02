@@ -21,15 +21,15 @@ module "eks" {
   cluster_endpoint_public_access = true
 
   eks_managed_node_group_defaults = {
-    ami_type = "AL2_x86_64"
-
+    # ami_type = "AL2_x86_64"
+    instance_types = ["m6i.large", "m5.large", "m5n.large", "m5zn.large"]
   }
 
   eks_managed_node_groups = {
     one = {
       name = "node-group-1"
 
-      instance_types = ["t2.micro"]
+      instance_types = ["t3.small"]
 
       min_size     = 1
       max_size     = 3
@@ -39,7 +39,7 @@ module "eks" {
     two = {
       name = "node-group-2"
 
-      instance_types = ["t2.micro"]
+      instance_types = ["t3.small"]
 
       min_size     = 1
       max_size     = 2
@@ -48,7 +48,6 @@ module "eks" {
   }
 }
 
-# https://aws.amazon.com/blogs/containers/amazon-ebs-csi-driver-is-now-generally-available-in-amazon-eks-add-ons/ 
 data "aws_iam_policy" "ebs_csi_policy" {
   arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
